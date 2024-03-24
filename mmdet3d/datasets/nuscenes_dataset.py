@@ -372,6 +372,7 @@ class NuScenesDataset(Custom3DDataset):
         }
 
         mmcv.mkdir_or_exist(jsonfile_prefix)
+        jsonfile_prefix = "results"
         res_path = osp.join(jsonfile_prefix, 'results_nusc.json')
         print('Results writes to', res_path)
         mmcv.dump(nusc_submissions, res_path)
