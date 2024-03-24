@@ -196,7 +196,7 @@ model = dict(
     )))
 
 dataset_type = 'RoboDriveDataset'
-data_root = 'data/nuscenes/robodrive-sensor'
+data_root = 'data/nuscenes/robodrive-sensor/'
 file_client_args = dict(backend='disk')
 
 db_sampler = dict(
