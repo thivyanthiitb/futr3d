@@ -323,7 +323,7 @@ eval_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=1,
+    samples_per_gpu=3,
     workers_per_gpu=4,
     train=dict(
         #type='CBGSDataset',
@@ -343,12 +343,14 @@ data = dict(
     val=dict(
         pipeline=test_pipeline, 
         classes=class_names, 
-        ann_file=data_root + 'nuscenes_infos_val.pkl',
+        ann_file=data_root + "robodrive_infos_test.pkl",
         modality=input_modality,),
     test=dict(
+        type=dataset_type,
         pipeline=test_pipeline, 
         classes=class_names, 
-        ann_file=data_root + 'nuscenes_infos_val.pkl',
+        ann_file=data_root + "robodrive_infos_test.pkl",
+        test_mode=True,
         modality=input_modality,))
 # For nuScenes dataset, we usually evaluate the model at the end of training.
 # Since the models are trained by 24 epochs by default, we set evaluation
