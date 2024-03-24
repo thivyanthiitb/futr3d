@@ -31,7 +31,7 @@ from .waymo_dataset import WaymoDataset
 
 __all__ = [
     'KittiDataset', 'KittiMonoDataset', 'build_dataloader', 'DATASETS',
-    'build_dataset', 'NuScenesDataset', 'NuScenesMonoDataset', 'LyftDataset',
+    'build_dataset', 'NuScenesDataset', 'RoboDriveDataset', 'NuScenesMonoDataset', 'LyftDataset',
     'ObjectSample', 'RandomFlip3D', 'ObjectNoise', 'GlobalRotScaleTrans',
     'PointShuffle', 'ObjectRangeFilter', 'PointsRangeFilter',
     'LoadPointsFromFile', 'S3DISSegDataset', 'S3DISDataset',

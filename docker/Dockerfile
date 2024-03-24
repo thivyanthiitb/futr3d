@@ -1,6 +1,6 @@
 ARG PYTORCH="1.12.1"
 ARG CUDA="11.3"
-ARG CUDNN="7"
+ARG CUDNN="8.2"
 ARG MMCV="1.7.2"
 ARG MMDET="2.28.2"
 ARG MMSEG="0.20.0"
@@ -32,5 +32,10 @@ RUN conda clean --all
 COPY . /mmdetection3d
 WORKDIR /mmdetection3d
 ENV FORCE_CUDA="1"
-RUN pip install -r requirements/build.txt
-RUN pip install --no-cache-dir -e .
+# RUN pip install -r requirements/build.txt
+# RUN pip install --no-cache-dir -e .
+
+
+# pip install mmcv-full==1.5.3 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
+# pip install mmsegmentation==0.30.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.12.1/index.html
+# pip install mmdet==2.28.2 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.10.0/index.html
