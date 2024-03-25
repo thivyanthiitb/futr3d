@@ -1,3 +1,5 @@
+query_size = (200, 200)
+
 _base_ = [
     '../../../../configs/_base_/datasets/nus-3d.py',
     '../../../../configs/_base_/default_runtime.py'
@@ -111,7 +113,7 @@ model = dict(
         type='FUTR3DHead',
         use_dab=True,
         anchor_size=3,
-        num_query=30*30, # 200*200
+        num_query=int(query_size[0]*query_size[1]),
         num_classes=10,
         in_channels=256,
         pc_range=point_cloud_range,
@@ -144,7 +146,8 @@ model = dict(
                             pc_range=point_cloud_range,
                             embed_dims=256,
                             use_modified_cnw=True,
-                            dynamic_fusion_input_shape=(200,200)),
+                            use_spatial_adaptive_fusion=True,
+                            fusion_input_shape=query_size),
                     ],
                     feedforward_channels=1024,
                     ffn_dropout=0.1,
