@@ -398,7 +398,7 @@ class NuScenesDataset(Custom3DDataset):
             dict: Dictionary of evaluation details.
         """
         from nuscenes import NuScenes
-        from nuscenes.eval.detection.evaluate import NuScenesEval
+        from nuscenes.eval.detection.evaluate import DetectionEval
 
         output_dir = osp.join(*osp.split(result_path)[:-1])
         nusc = NuScenes(
@@ -407,7 +407,7 @@ class NuScenesDataset(Custom3DDataset):
             'v1.0-mini': 'mini_val',
             'v1.0-trainval': 'val',
         }
-        nusc_eval = NuScenesEval(
+        nusc_eval = DetectionEval(
             nusc,
             config=self.eval_detection_configs,
             result_path=result_path,
