@@ -299,6 +299,7 @@ eval_pipeline = [
 ]
 
 data = dict(
+    samples_per_gpu=1,
     train=dict(
         type='CBGSDataset',
         dataset=dict(
@@ -325,3 +326,4 @@ find_unused_parameters=True
 custom_hooks = [dict(type='FadeOjectSampleHook', num_last_epochs=5)]
 
 checkpoint_config = dict(interval=1, max_keep_ckpts=1)
+runner = dict(type='EpochBasedRunner', max_epochs=6)

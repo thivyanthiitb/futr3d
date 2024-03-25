@@ -7,6 +7,7 @@ python -m torch.distributed.launch \
     tools/train.py \
     plugin/fudet/configs/lidar_cam/lidar_0075v_cam_vov.py \
     --seed 0 \
+    --cfg-options runner.max_epochs=6 data.samples_per_gpu=12\
     --launcher pytorch
 
 python -m torch.distributed.launch \
@@ -17,6 +18,7 @@ python -m torch.distributed.launch \
     tools/train.py \
     plugin/fudet/configs/lidar_only/lidar_0075v_900q.py \
     --seed 0 \
+    --cfg-options runner.max_epochs=6 data.samples_per_gpu=15\
     --launcher pytorch
 
 python -m torch.distributed.launch \
