@@ -14,6 +14,7 @@ from mmcv.runner.base_module import BaseModule
 from mmcv.utils import IS_CUDA_AVAILABLE, IS_MLU_AVAILABLE
 from mmdet.models.utils.builder import TRANSFORMER
 
+from ..fusers.modified_cnw import ModifiedCNW
 
 def inverse_sigmoid(x, eps=1e-5):
     """Inverse function of sigmoid.
@@ -75,7 +76,9 @@ class FUTR3DAttention(BaseModule):
                  rad_cuda=True,
                  batch_first=False,
                  norm_cfg=None,
-                 init_cfg=None):
+                 init_cfg=None,
+                 use_modified_cnw=True,
+                 fusion_input_shape=None):
         super().__init__(init_cfg)
         if embed_dims % num_heads != 0:
             raise ValueError(f'embed_dims must be divisible by num_heads, '
@@ -90,6 +93,9 @@ class FUTR3DAttention(BaseModule):
         self.pc_range = pc_range
         self.num_cams = num_cams
         self.rad_cuda = rad_cuda
+        
+        self.use_modified_cnw = use_modified_cnw
+        self.fusion_input_shape = fusion_input_shape
 
         # you'd better set dim_per_head to a power of 2
         # which is more efficient in the CUDA implementation
@@ -148,14 +154,18 @@ class FUTR3DAttention(BaseModule):
             self.fused_embed += radar_dims
 
         if self.fused_embed > embed_dims:
-            self.modality_fusion_layer = nn.Sequential(
-                nn.Linear(self.fused_embed, self.embed_dims),
-                nn.LayerNorm(self.embed_dims),
-                nn.ReLU(inplace=False),
-                nn.Linear(self.embed_dims, self.embed_dims),
-                nn.LayerNorm(self.embed_dims),
-            )
 
+            if self.use_modified_cnw:
+                self.fusion_layer = ModifiedCNW(self.embed_dims, self.fusion_input_shape)
+            else:
+                self.fusion_layer = nn.Sequential(
+                    nn.Linear(self.fused_embed, self.embed_dims),
+                    nn.LayerNorm(self.embed_dims),
+                    nn.ReLU(inplace=False),
+                    nn.Linear(self.embed_dims, self.embed_dims),
+                    nn.LayerNorm(self.embed_dims),
+                )
+            
         self.init_weights()
 
     def init_weights(self):
@@ -283,7 +293,7 @@ class FUTR3DAttention(BaseModule):
             else:
                 raise ValueError(
                     f'Last dim of reference_points must be'
-                    f' 2, but get {reference_points.shape[-1]} instead.')
+                    f' 2, but got {reference_points.shape[-1]} instead.')
             if ((IS_CUDA_AVAILABLE and value.is_cuda)
                     or (IS_MLU_AVAILABLE and value.is_mlu)):
                 output = MultiScaleDeformableAttnFunction.apply(
@@ -362,13 +372,18 @@ class FUTR3DAttention(BaseModule):
             
         if self.use_lidar and self.use_camera and self.use_radar:
             output = torch.cat((img_output, pts_output, radar_output), dim=2)
-            output = self.modality_fusion_layer(output)
+            output = self.fusion_layer(output)
         elif self.use_lidar and self.use_camera:
-            output = torch.cat((img_output, pts_output), dim=2)
-            output = self.modality_fusion_layer(output)
+            if self.use_modified_cnw:
+                output = self.fusion_layer([pts_output, img_output])
+            else:
+                output = torch.cat((img_output, pts_output), dim=2)
+                output = self.fusion_layer(output)
+
+
         elif self.use_camera and self.use_radar:
             output = torch.cat((img_output, radar_output), dim=2)
-            output = self.modality_fusion_layer(output)
+            output = self.fusion_layer(output)
         elif self.use_lidar:
             output = pts_output
         elif self.use_camera:
