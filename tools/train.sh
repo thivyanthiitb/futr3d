@@ -3,12 +3,13 @@ python -m torch.distributed.launch \
     --nnodes=1 \
     --node_rank=0 \
     --master_addr="127.0.0.1" \
+    --master_port="39500" \
     --nproc_per_node=2 \
     tools/train.py \
     plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_vov.py \
     --seed 0 \
-    --cfg-options runner.max_epochs=6 \
-    data.samples_per_gpu=12 \
+    --cfg-options runner.max_epochs=36 \
+    data.samples_per_gpu=13 \
     load_from='checkpoint/lidar_0075_cam_vov.pth' \
     --launcher pytorch
 

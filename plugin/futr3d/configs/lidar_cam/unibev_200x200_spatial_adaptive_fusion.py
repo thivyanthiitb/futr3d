@@ -775,4 +775,4 @@ lr_config = dict(
     min_lr_ratio=1e-3)
 checkpoint_config = dict(interval=1, max_keep_ckpts=1)
 
-load_from = 'checkpoint/lidar_0075_cam_vov.pth'
+# load_from = 'checkpoint/lidar_0075_cam_vov.pth'
