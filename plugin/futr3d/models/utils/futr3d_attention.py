@@ -77,8 +77,8 @@ class FUTR3DAttention(BaseModule):
                  batch_first=False,
                  norm_cfg=None,
                  init_cfg=None,
-                 use_modified_cnw=True,
-                 use_spatial_adaptive_fusion=True,
+                 use_modified_cnw=False,
+                 use_spatial_adaptive_fusion=False,
                  fusion_input_shape=None):
         super().__init__(init_cfg)
         if embed_dims % num_heads != 0:
