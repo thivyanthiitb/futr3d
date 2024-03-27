@@ -1,0 +1,45 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "train futr3d default",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "tools/train.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": "plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_vov.py"
+    },
+    {
+      "name": "train futr3d modified_cnw",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "tools/train.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": "plugin/futr3d/configs/lidar_cam/modified_cnw.py"
+    },
+    {
+      "name": "train futr3d attentive cnw",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "tools/train.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": "plugin/futr3d/configs/lidar_cam/attentive_cnw.py"
+    },
+
+    {
+      "name": "test futr3d modified_cnw",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "tools/test.py",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": "plugin/futr3d/configs/lidar_cam/modified_cnw.py work_dirs/modified_cnw/epoch_2.pth --eval bbox"
+    },
+  ]
+}
