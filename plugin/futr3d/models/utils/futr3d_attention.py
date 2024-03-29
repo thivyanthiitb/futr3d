@@ -15,6 +15,7 @@ from mmcv.utils import IS_CUDA_AVAILABLE, IS_MLU_AVAILABLE
 from mmdet.models.utils.builder import TRANSFORMER
 
 from ..fusers.modified_cnw import ModifiedCNW
+from ..fusers.attentive_cnw import AttentiveCNW
 
 def inverse_sigmoid(x, eps=1e-5):
     """Inverse function of sigmoid.
@@ -77,9 +78,10 @@ class FUTR3DAttention(BaseModule):
                  batch_first=False,
                  norm_cfg=None,
                  init_cfg=None,
-                 use_modified_cnw=False,
-                 use_spatial_adaptive_fusion=False,
-                 fusion_input_shape=None):
+                 use_cnw=False,
+                 use_adaptive_fusion=False,
+                 fusion_input_shape=None,
+                 use_attentive_cnw=False,):
         super().__init__(init_cfg)
         if embed_dims % num_heads != 0:
             raise ValueError(f'embed_dims must be divisible by num_heads, '
@@ -95,9 +97,10 @@ class FUTR3DAttention(BaseModule):
         self.num_cams = num_cams
         self.rad_cuda = rad_cuda
         
-        self.use_modified_cnw = use_modified_cnw
-        self.use_spatial_adaptive_fusion = use_spatial_adaptive_fusion
+        self.use_cnw = use_cnw
+        self.use_adaptive_fusion = use_adaptive_fusion
         self.fusion_input_shape = fusion_input_shape
+        self.use_attentive_cnw = use_attentive_cnw
 
         # you'd better set dim_per_head to a power of 2
         # which is more efficient in the CUDA implementation
@@ -156,10 +159,18 @@ class FUTR3DAttention(BaseModule):
             self.fused_embed += radar_dims
 
         if self.fused_embed > embed_dims:
-            if self.use_modified_cnw:
-                self.fusion_layer = ModifiedCNW(self.embed_dims, self.fusion_input_shape, use_spatial_adaptive_fusion)
+            if self.use_cnw:
+                self.fusion_layer = ModifiedCNW(self.embed_dims, self.fusion_input_shape, use_adaptive_fusion)
+            elif self.use_attentive_cnw:
+                self.fusion_layer = AttentiveCNW(
+                    num_cross_attn=3,
+                    num_self_attn=2,
+                    num_queries=self.fusion_input_shape[0]*self.fusion_input_shape[0], 
+                    d_model=self.embed_dims, 
+                    fusion_input_shape=self.fusion_input_shape,
+                )
             else:
-                self.fusion_layer = nn.Sequential(
+                self.modality_fusion_layer = nn.Sequential(
                     nn.Linear(self.fused_embed, self.embed_dims),
                     nn.LayerNorm(self.embed_dims),
                     nn.ReLU(inplace=False),
@@ -373,18 +384,18 @@ class FUTR3DAttention(BaseModule):
             
         if self.use_lidar and self.use_camera and self.use_radar:
             output = torch.cat((img_output, pts_output, radar_output), dim=2)
-            output = self.fusion_layer(output)
+            output = self.modality_fusion_layer(output)
         elif self.use_lidar and self.use_camera:
-            if self.use_modified_cnw:
+            if self.use_cnw or self.use_attentive_cnw:
                 output = self.fusion_layer([pts_output, img_output])
             else:
                 output = torch.cat((img_output, pts_output), dim=2)
-                output = self.fusion_layer(output)
+                output = self.modality_fusion_layer(output)
 
 
         elif self.use_camera and self.use_radar:
             output = torch.cat((img_output, radar_output), dim=2)
-            output = self.fusion_layer(output)
+            output = self.modality_fusion_layer(output)
         elif self.use_lidar:
             output = pts_output
         elif self.use_camera:
@@ -393,7 +404,7 @@ class FUTR3DAttention(BaseModule):
             output = img_output
 
         if not self.batch_first:
-            # (num_query, bs ,embed_dims)
+            # (num_query, bs, embed_dims)
             output = output.permute(1, 0, 2)
 
         return self.dropout(output) + identity
@@ -440,4 +451,3 @@ def feature_sampling(mlvl_feats, reference_points, pc_range, img_metas):
     sampled_feats = torch.stack(sampled_feats, -1)
     sampled_feats = sampled_feats.view(B, C, num_query, num_cam,  1, len(mlvl_feats))
     return reference_points_3d, sampled_feats, mask
-
