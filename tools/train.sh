@@ -1,16 +1,17 @@
-export CUDA_VISIBLE_DEVICES=2,3
+export CUDA_VISIBLE_DEVICES=0,1
 python -m torch.distributed.launch \
     --nnodes=1 \
     --node_rank=0 \
     --master_addr="127.0.0.1" \
-    --master_port="39500" \
+    --master_port="29500" \
     --nproc_per_node=2 \
     tools/train.py \
-    plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_vov.py \
+    plugin/futr3d/configs/lidar_cam/attentive_cnw.py \
     --seed 0 \
-    --cfg-options runner.max_epochs=36 \
-    data.samples_per_gpu=13 \
-    load_from='checkpoint/lidar_0075_cam_vov.pth' \
+    --cfg-options runner.max_epochs= 12\
+    checkpoint_config.max_keep_ckpts=12 \
+    data.samples_per_gpu=10 \
+    load_from='checkpoint/lidar_0075_cam_vov_900q.pth' \
     --launcher pytorch
 
 python -m torch.distributed.launch \
@@ -24,7 +25,7 @@ python -m torch.distributed.launch \
     --cfg-options runner.max_epochs=12 \
     data.samples_per_gpu=8 \
     checkpoint_config.max_keep_ckpts=12 \
-    load_from='checkpoint/lidar_0075_cam_vov.pth' \
+    load_from='checkpoint/workspace/futr3d/checkpoint/lidar_0075_cam_vov_900q.pth1vog0q2ktmp' \
     --launcher pytorch
 
 python -m torch.distributed.launch \
