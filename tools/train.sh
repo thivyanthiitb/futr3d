@@ -4,15 +4,15 @@ python -m torch.distributed.launch \
     --node_rank=0 \
     --master_addr="127.0.0.1" \
     --master_port="29500" \
-    --nproc_per_node=2 \
+    --nproc_per_node=1 \
     tools/train.py \
-    plugin/futr3d/configs/lidar_cam/attentive_cnw.py \
+    plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_vov.py \
+    --launcher pytorch \
     --seed 0 \
-    --cfg-options runner.max_epochs= 12\
-    checkpoint_config.max_keep_ckpts=12 \
+    --cfg-options runner.max_epochs=12 \
     data.samples_per_gpu=10 \
-    load_from='checkpoint/lidar_0075_cam_vov_900q.pth' \
-    --launcher pytorch
+    load_from='work_dirs/lidar_0075v_cam_vov/epoch_5.pth' \
+    checkpoint_config.max_keep_ckpts=12 \
 
 python -m torch.distributed.launch \
     --nnodes=1 \
