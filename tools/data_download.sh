@@ -9,3 +9,5 @@ wget https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-trainval08_blob
 wget https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-trainval09_blobs.tgz
 wget https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-trainval10_blobs.tgz
 wget https://motional-nuscenes.s3.amazonaws.com/public/v1.0/v1.0-test_blobs.tgz
+
+pv v1.0-trainval01_blobs.tgz | tar -xz -C ./nuscenes
